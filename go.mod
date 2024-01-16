@@ -44,7 +44,7 @@ replace (
 	k8s.io/kms => k8s.io/kms v0.27.9
 	k8s.io/kube-aggregator => k8s.io/kube-aggregator v0.27.9
 	k8s.io/kube-controller-manager => k8s.io/kube-controller-manager v0.27.9
-	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20230501164219-8b0f38b5fd1f
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20240105020646-a37d4de58910
 	k8s.io/kube-proxy => k8s.io/kube-proxy v0.27.9
 	k8s.io/kube-scheduler => k8s.io/kube-scheduler v0.27.9
 	k8s.io/kubectl => k8s.io/kubectl v0.27.9
@@ -152,12 +152,12 @@ require (
 	k8s.io/apiserver v0.27.9
 	k8s.io/cli-runtime v0.27.9
 	k8s.io/client-go v12.0.0+incompatible
-	k8s.io/gengo v0.0.0-20230306165830-ab3349d207d4
+	k8s.io/gengo v0.0.0-20230829151522-9cce18d56c01
 	k8s.io/helm v2.16.9+incompatible
 	k8s.io/kube-aggregator v0.27.9
 	k8s.io/kubectl v0.27.9
 	k8s.io/kubernetes v1.27.9
-	k8s.io/utils v0.0.0-20230505201702-9f6742963106
+	k8s.io/utils v0.0.0-20230726121419-3b25d923346b
 	sigs.k8s.io/aws-iam-authenticator v0.5.9
 	sigs.k8s.io/cluster-api v1.5.0
 	sigs.k8s.io/controller-runtime v0.15.1
@@ -194,6 +194,7 @@ require (
 	github.com/go-openapi/strfmt v0.21.7 // indirect
 	github.com/go-openapi/validate v0.22.1 // indirect
 	github.com/google/cel-go v0.12.7 // indirect
+	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-containerregistry v0.14.0 // indirect
 	github.com/google/go-intervals v0.0.2 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
