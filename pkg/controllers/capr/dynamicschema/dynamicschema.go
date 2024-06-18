@@ -14,6 +14,7 @@ import (
 	"github.com/rancher/wrangler/v2/pkg/generic"
 	"github.com/rancher/wrangler/v2/pkg/schemas"
 	"github.com/rancher/wrangler/v2/pkg/schemas/openapi"
+	"github.com/sirupsen/logrus"
 	apierror "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -124,38 +125,46 @@ func addMachineTemplateSchema(name string, specSchema *schemas.Schema, allSchema
 }
 
 func getSchemas(name string, spec *v3.DynamicSchemaSpec) (string, string, string, *schemas.Schemas, error) {
+	logrus.Infof("QQQ: >> dynamicschema.getSchemas(name=%s)", name)
 	allSchemas, err := schemas.NewSchemas()
 	if err != nil {
+		logrus.Infof("QQQ: << dynamicschema.getSchemas - error in schemas.NewSchemas(): %s", err)
 		return "", "", "", nil, err
 	}
 
 	configSpecSchema, err := getConfigSchemas(name, allSchemas, spec)
 	if err != nil {
+		logrus.Infof("QQQ: << dynamicschema.getSchemas - error in getConfigSchemas(): %s", err)
 		return "", "", "", nil, err
 	}
 
 	specSchema, err := getSpecSchemas(name, allSchemas, spec)
 	if err != nil {
+		logrus.Infof("QQQ: << dynamicschema.getSchemas - error in getSpecSchemas(): %s", err)
 		return "", "", "", nil, err
 	}
 
 	statusSchema, err := getStatusSchema(allSchemas)
 	if err != nil {
+		logrus.Infof("QQQ: << dynamicschema.getSchemas - error ing getStatusSchema(): %s", err)
 		return "", "", "", nil, err
 	}
 
 	nodeConfigID, err := addConfigSchema(name, configSpecSchema, allSchemas)
 	if err != nil {
+		logrus.Infof("QQQ: << dynamicschema.getSchemas - error ing addConfigSchema(): %s", err)
 		return "", "", "", nil, err
 	}
 
 	templateID, err := addMachineTemplateSchema(name, specSchema, allSchemas)
 	if err != nil {
+		logrus.Infof("QQQ: << dynamicschema.getSchemas - error ing addMachineTemplateSchema(): %s", err)
 		return "", "", "", nil, err
 	}
 
 	machineID, err := addMachineSchema(name, specSchema, statusSchema, allSchemas)
 	if err != nil {
+		logrus.Infof("QQQ: << dynamicschema.getSchemas - error ing addMachineSchema(): %s", err)
 		return "", "", "", nil, err
 	}
 
@@ -277,9 +286,11 @@ func getSpecSchemas(name string, allSchemas *schemas.Schemas, spec *v3.DynamicSc
 }
 
 func (h *handler) OnChange(obj *v3.DynamicSchema, status v3.DynamicSchemaStatus) ([]runtime.Object, v3.DynamicSchemaStatus, error) {
+	logrus.Infof("QQQ: dynamicschema.OnChange, obj.Name: %s, status: %v", obj.Name, status)
 	if obj.Name == "nodetemplateconfig" {
 		all, err := h.schemaCache.List(labels.Everything())
 		if err != nil {
+			logrus.Infof("QQQ: dynamicschema.OnChange: error getting h.schemaCache.List: %s", err)
 			return nil, status, err
 		}
 		for _, schema := range all {
@@ -292,28 +303,33 @@ func (h *handler) OnChange(obj *v3.DynamicSchema, status v3.DynamicSchemaStatus)
 
 	name, node, _, err := h.getStyle(obj.Name)
 	if err != nil {
+		logrus.Infof("QQQ: dynamicschema.OnChange: error getting style: %s", err)
 		return nil, status, err
 	}
 
 	if !node { // only support nodes right now  && !cluster {
+		logrus.Infof("QQQ: dynamicschema.OnChange: error getting style: no node")
 		return nil, status, nil
 	}
 
 	nodeConfigID, templateID, machineID, schemas, err := getSchemas(name, &obj.Spec)
 	if err != nil {
+		logrus.Infof("QQQ: dynamicschema.OnChange: error getting schemas: %s", err)
 		return nil, status, err
 	}
+	logrus.Infof("QQQ: Schema IDs: nodeConfigID:%s, templateID:%s, machineID:%s", nodeConfigID, templateID, machineID)
 
 	var result []runtime.Object
 
 	for _, id := range []string{nodeConfigID, templateID, machineID} {
 		props, err := openapi.ToOpenAPI(id, schemas)
 		if err != nil {
+			logrus.Infof("QQQ: err in openapi.ToOpenAPI: %s", err)
 			return nil, status, err
 		}
 
 		_, ok := props.Properties["status"]
-		crd := crd.CRD{
+		myCRD := crd.CRD{
 			GVK: schema.GroupVersionKind{
 				Group:   machineAPIGroup,
 				Version: rkev1.SchemeGroupVersion.Version,
@@ -328,13 +344,18 @@ func (h *handler) OnChange(obj *v3.DynamicSchema, status v3.DynamicSchemaStatus)
 		}
 
 		if nodeConfigID == id {
-			crd.GVK.Group = MachineConfigAPIGroup
+			myCRD.GVK.Group = MachineConfigAPIGroup
+			logrus.Infof("QQQ: **** Saw an id of nodeConfigID:%s", nodeConfigID)
 		}
 
-		crdObj, err := crd.ToCustomResourceDefinition()
+		crdObj, err := myCRD.ToCustomResourceDefinition()
 		if err != nil {
+			logrus.Infof("QQQ: myCRD.ToCustomResourceDefinition => error: %s\n", err)
 			return nil, status, err
 		}
+		logrus.Infof("QQQ: myCRD.ToCustomResourceDefinition => no error...\n")
+		gvk := crdObj.GetObjectKind().GroupVersionKind()
+		logrus.Infof("QQQ:GVK is %s/%s/%s", gvk.Group, gvk.Version, gvk.Kind)
 		result = append(result, crdObj)
 	}
 
@@ -351,6 +372,7 @@ func (h *handler) getStyle(name string) (string, bool, bool, error) {
 		if apierror.IsNotFound(err) {
 			continue
 		} else if err != nil {
+			logrus.Infof("QQQ: dynamicschema.getStyle: error in h.schemaCache.Get(%s): %s", typeName, err)
 			return "", false, false, err
 		}
 		for key := range schema.Spec.ResourceFields {

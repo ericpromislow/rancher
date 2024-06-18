@@ -40,7 +40,7 @@ WORKDIR /var/lib/rancher
 
 ARG ARCH=amd64
 ARG ETCD_UNSUPPORTED_ARCH
-ARG IMAGE_REPO=rancher
+ARG IMAGE_REPO=morspin
 ARG SYSTEM_CHART_DEFAULT_BRANCH=dev-v2.9
 ARG CHART_DEFAULT_BRANCH=dev-v2.9
 ARG PARTNER_CHART_DEFAULT_BRANCH=main
@@ -257,7 +257,7 @@ ENV CATTLE_CLI_URL_DARWIN  https://releases.rancher.com/cli2/${CATTLE_CLI_VERSIO
 ENV CATTLE_CLI_URL_LINUX   https://releases.rancher.com/cli2/${CATTLE_CLI_VERSION}/rancher-linux-amd64-${CATTLE_CLI_VERSION}.tar.gz
 ENV CATTLE_CLI_URL_WINDOWS https://releases.rancher.com/cli2/${CATTLE_CLI_VERSION}/rancher-windows-386-${CATTLE_CLI_VERSION}.zip
 
-ARG VERSION=dev
+ARG VERSION=v04
 ENV CATTLE_SERVER_VERSION ${VERSION}
 COPY entrypoint.sh rancher /usr/bin/
 COPY kustomize.sh /usr/bin/
