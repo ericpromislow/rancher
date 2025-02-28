@@ -50,14 +50,19 @@ if [ ! -f "${K3S_AIRGAP_IMAGES_TARBALL}" ]; then
 fi
 
 PACKAGE_FOLDER="${SCRIPT_DIR}/../package/"
-cp "${RANCHER_BINARY}" "${PACKAGE_FOLDER}"
-cp "${DATA_JSON_FILE}" "${PACKAGE_FOLDER}"
-cp "${K3S_AIRGAP_IMAGES_TARBALL}" "${PACKAGE_FOLDER}"
+case $PWD in
+    */rancher/rancher$) PACKAGE_FOLDER=package ;;
+esac
+
+cp "${RANCHER_BINARY}" "${PACKAGE_FOLDER}/"
+cp "${DATA_JSON_FILE}" "${PACKAGE_FOLDER}/"
+cp "${K3S_AIRGAP_IMAGES_TARBALL}" "${PACKAGE_FOLDER}/"
 
 echo "QQQ: PACKAGE_FOLDER: $PACKAGE_FOLDER"
 DOCKERFILE="${PACKAGE_FOLDER}/Dockerfile-main-dev"
 # Always use buildx to make sure the image & the binary architectures match
-docker buildx build -t "${TARGET_REPO}" -f "${DOCKERFILE}" "${PACKAGE_FOLDER}" --platform="${TARGET_OS}/${TARGET_ARCH}" --build-arg IMAGE_REPO=$REPO --build-arg VERSION=$TAG
+ATAG="$(echo $TAG | sed s/arm64/amd64/g)"
+docker buildx build -t "${TARGET_REPO}" -f "${DOCKERFILE}" "${PACKAGE_FOLDER}" --platform="${TARGET_OS}/${TARGET_ARCH}" --build-arg IMAGE_REPO=$REPO --build-arg VERSION=$TAG --build-arg AVERSION=ATAG
 
 # ???? Not sure we need the second 'docker build' command....
 # Work at the repo top level
