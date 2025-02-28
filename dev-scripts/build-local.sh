@@ -62,7 +62,7 @@ echo "QQQ: PACKAGE_FOLDER: $PACKAGE_FOLDER"
 DOCKERFILE="${PACKAGE_FOLDER}/Dockerfile-main-dev"
 # Always use buildx to make sure the image & the binary architectures match
 ATAG="$(echo $TAG | sed s/arm64/amd64/g)"
-docker buildx build -t "${TARGET_REPO}" -f "${DOCKERFILE}" "${PACKAGE_FOLDER}" --platform="${TARGET_OS}/${TARGET_ARCH}" --build-arg IMAGE_REPO=$REPO --build-arg VERSION=$TAG --build-arg AVERSION=ATAG
+docker buildx build -t "${TARGET_REPO}" -f "${DOCKERFILE}" "${PACKAGE_FOLDER}" --platform="${TARGET_OS}/${TARGET_ARCH}" --build-arg IMAGE_REPO=$REPO --build-arg VERSION=$TAG --build-arg AVERSION="$ATAG"
 
 # ???? Not sure we need the second 'docker build' command....
 # Work at the repo top level
