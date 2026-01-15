@@ -78,8 +78,18 @@ cp -l /bin/rm /opt/jail/$NAME/bin/
 # Hard link mkisofs into the jail
 cp -l /usr/bin/mkisofs /opt/jail/$NAME/usr/bin
 
-cd /dev
-# tar copy a minimum set of devices from /dev
-tar cf - zero urandom tty stdout stdin stderr random null fd core full | (cd /opt/jail/${NAME}/dev; tar xfp -)
+if [[ ! -e /dev/core && -e /proc/kcore ]] ; then
+    echo "Creating a /dev/core symlink to kcore"
+    ln -sf /proc/kcore /dev/core
+fi
+
+for file in zero urandom tty stdout stdin stderr random null fd full core ; do
+    if [[ -e /dev/$file ]] ; then
+       echo "Try to tar over $file"
+       tar cf - $file | (cd /opt/jail/$NAME/dev ; tar xfp -)
+    else
+        echo "no /dev/$file to tar up and put in jail"
+    fi
+done
 
 touch /opt/jail/$NAME/done

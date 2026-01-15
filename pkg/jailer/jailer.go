@@ -80,10 +80,13 @@ func CreateJail(name string) error {
 		logrus.Tracef("CreateJail: no output from jail script for [%s]", name)
 	}
 	if err != nil {
+		s := ""
 		if strings.HasSuffix(err.Error(), "signal: killed") {
-			return errors.WithMessage(err, "error running the jail command: timed out waiting for the script to complete")
+			s = "error running the jail command: timed out waiting for the script to complete"
+		} else {
+			s = "error running the jail command"
 		}
-		return errors.WithMessage(err, "error running the jail command")
+		return errors.WithMessage(err, fmt.Sprintf("%s; output: [%s]\n", s, out))
 	}
 	return nil
 }
