@@ -62,12 +62,12 @@ var (
 	httpsStart = regexp.MustCompile("^https:/([^/])")
 	badHeaders = map[string]bool{
 		"authorization":           true,
-		"cf-connecting-ip":  true,
-		"cf-ray":            true,
-		"content-length":    true,
+		"cf-connecting-ip":        true,
+		"cf-ray":                  true,
+		"content-length":          true,
 		"cookie":                  true,
 		"host":                    true,
-		"referer":           true,
+		"referer":                 true,
 		"transfer-encoding":       true,
 		"x-api-auth-header":       true,
 		"x-api-cattleauth-header": true,
