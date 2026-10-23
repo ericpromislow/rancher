@@ -126,7 +126,7 @@ func NewProxy(prefix string, validHosts Supplier, scaledContext *config.ScaledCo
 // newHandler rewrites the request and hands it to the reverse proxy, or responds
 // with 502 if the rewrite fails.
 func newHandler(p *proxy) http.Handler {
-	reverseProxy := &httputil.ReverseProxy{
+	rp := &httputil.ReverseProxy{
 		Director: func(req *http.Request) {
 			if err := p.proxy(req); err != nil {
 				logrus.Errorf("Failed to proxy request: %v", err)
